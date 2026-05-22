@@ -1,0 +1,115 @@
+---
+title: "Análisis Exploratorio de Expresión Génica — GSE152075"
+author: "ANTONIO BELLIDO MAYA"
+output:
+  pdf_document:
+    toc: true
+  html_document:
+    toc: true
+    toc_float: true
+---
+```{r setup, include=FALSE}
+# Librerías
+library(edgeR)
+library(ggplot2)
+library(pheatmap)
+library(dplyr)
+
+# Ruta de trabajo
+setwd("/home/bellido17/proyecto_GSE152075")
+
+# --- Cargar matriz de counts ---
+lines <- readLines(gzfile("GSE152075_raw_counts_GEO.txt.gz"), n = 1)
+samples <- unlist(strsplit(lines, " "))
+
+counts <- read.table(gzfile("GSE152075_raw_counts_GEO.txt.gz"),
+                     header = FALSE, skip = 1, stringsAsFactors = FALSE)
+rownames(counts) <- counts$V1
+counts <- counts[ , -1]
+colnames(counts) <- samples
+counts <- as.data.frame(apply(counts, 2, as.numeric))
+
+# --- Crear vector class manual ---
+num_samples <- ncol(counts)
+half <- num_samples / 2
+class <- c(rep("case", half), rep("control", half))
+
+# --- Crear sample_info ---
+sample_info <- data.frame(
+  sample = colnames(counts),
+  class = class,
+  stringsAsFactors = FALSE
+)
+
+# --- edgeR ---
+dge <- DGEList(counts = counts, group = sample_info$class)
+keep <- filterByExpr(dge)
+dge <- dge[keep, , keep.lib.sizes = FALSE]
+dge <- calcNormFactors(dge)
+lcpm <- cpm(dge, log = TRUE)
+```{r pca_plot}
+pca <- prcomp(t(lcpm), scale. = TRUE)
+pca_df <- data.frame(PC1 = pca$x[,1], PC2 = pca$x[,2], class = sample_info$class)
+
+ggplot(pca_df, aes(PC1, PC2, color = class)) +
+  geom_point(size = 3) +
+  theme_minimal() +
+  ggtitle("PCA de las muestras")
+```{r heatmap_correlation}
+cor_mat <- cor(lcpm)
+
+pheatmap(
+  cor_mat,
+  show_rownames = FALSE,
+  show_colnames = FALSE,
+  fontsize = 6
+)
+```{r ttest_results}
+group <- sample_info$class
+
+res <- apply(lcpm, 1, function(x) {
+  g1 <- x[group == "case"]
+  g2 <- x[group == "control"]
+  if(length(g1) < 2 | length(g2) < 2) return(c(stat = NA, p.value = NA))
+  test <- t.test(g1, g2)
+  c(stat = test$statistic, p.value = test$p.value)
+})
+
+res_df <- as.data.frame(t(res))
+res_df$gene <- rownames(res_df)
+res_df$adj.p <- p.adjust(res_df$p.value, method = "BH")
+res_df <- res_df[order(res_df$adj.p), ]
+
+# Guardar resultados
+write.csv(res_df, "ttest_results_full.csv", row.names = FALSE)
+head(res_df, 10)
+```{r heatmap_top100}
+top_genes <- head(res_df$gene, 100)
+mat_top_z <- t(scale(t(lcpm[top_genes, ])))
+
+annotation_col <- data.frame(Class = sample_info$class)
+rownames(annotation_col) <- sample_info$sample
+
+pheatmap(
+  mat_top_z,
+  annotation_col = annotation_col,
+  show_rownames = FALSE,
+  width = 7,
+  height = 9
+)
+```{r boxplots_top6}
+top6 <- head(res_df$gene, 6)
+
+df_bp <- data.frame(
+  gene = rep(top6, each = ncol(lcpm)),
+  sample = rep(colnames(lcpm), times = length(top6)),
+  expr = as.vector(t(lcpm[top6, ]))
+)
+
+df_bp <- merge(df_bp, sample_info, by = "sample")
+
+ggplot(df_bp, aes(x = class, y = expr, fill = class)) +
+  geom_boxplot() +
+  facet_wrap(~gene, scales = "free_y") +
+  theme_minimal() +
+  ggtitle("Boxplots top 6 genes")

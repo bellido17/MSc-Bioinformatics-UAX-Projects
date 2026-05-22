@@ -24,3 +24,9 @@ Collection of academic projects and scripts developed during the Master's in Bio
 
 \* \*\*Description:\*\* A modular parsing tool that ingests standard `.fasta` files, cleans mRNA sequences, and translates them into amino acid chains using a customized genetic code dictionary algorithm. Includes binary file data handling and robust string manipulation.
 
+
+
+### 3. GEO-Expression-Analysis-R
+* **Language:** R (RMarkdown)
+* **Description:** Comprehensive transcriptomic data analysis pipeline using a real Gene Expression Omnibus (GEO) dataset (GSE152075). Demonstrates proficiency in bioinformatics R packages, reproducible research practices (generating HTML/PDF automated reports), and statistical evaluation of genomic expression data.
+
