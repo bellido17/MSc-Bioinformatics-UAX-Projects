@@ -35,3 +35,9 @@ Collection of academic projects and scripts developed during the Master's in Bio
 ### 4. Multiomics-Data-Integration
 * **Language:** Python (Jupyter Notebook)
 * **Description:** Advanced integration and analysis of multi-layered biological data (Multiomics). Showcases the ability to handle complex datasets, apply computational data science techniques to extract cross-omics insights, and document findings in a comprehensive scientific report.
+
+
+
+### 5. Variant-Annotation-VEP-Pipeline
+* **Language:** Bash (Shell Scripting)
+* **Description:** Automation of clinical genomics pipelines using Bash. Implemented the Ensembl Variant Effect Predictor (VEP) tool to functionally annotate patient exome data. Includes the generation of comprehensive summary reports identifying clinically relevant genetic variants, demonstrating strong command-line (Linux) proficiency.
