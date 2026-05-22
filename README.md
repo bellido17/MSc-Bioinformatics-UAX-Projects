@@ -30,3 +30,8 @@ Collection of academic projects and scripts developed during the Master's in Bio
 * **Language:** R (RMarkdown)
 * **Description:** Comprehensive transcriptomic data analysis pipeline using a real Gene Expression Omnibus (GEO) dataset (GSE152075). Demonstrates proficiency in bioinformatics R packages, reproducible research practices (generating HTML/PDF automated reports), and statistical evaluation of genomic expression data.
 
+
+
+### 4. Multiomics-Data-Integration
+* **Language:** Python (Jupyter Notebook)
+* **Description:** Advanced integration and analysis of multi-layered biological data (Multiomics). Showcases the ability to handle complex datasets, apply computational data science techniques to extract cross-omics insights, and document findings in a comprehensive scientific report.
